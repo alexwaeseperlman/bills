@@ -1,0 +1,15 @@
+Bill columns
+title: string
+date: timestamp
+status: 1-7:
+    1 first reading (stage 1)
+    2 second reading (stage 1)
+    3 third reading (stage 1)
+    4 first reading (stage 2)
+    5 second reading (stage 2)
+    6 third reading (stage 2)
+    7 Passed
+    Note that stage 1 is senate if this is a S-bill, and house of commons if it's a C-bill
+bill_type: 'S' | 'C' (e.g. S)
+bill_id: string (e.g. S-6)
+bill_num: int (e.g. 6)
