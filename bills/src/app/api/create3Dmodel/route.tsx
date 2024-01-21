@@ -47,9 +47,7 @@ export async function POST(request: NextRequest) {
       console.log('polling', response.data)
       if (response.data.status === "SUCCEEDED") {
         await models.updateOne({
-          createdAt: new Date(),
-          prompt: prompt,
-          taskId: response.data.result,
+          taskId,
         }, {
           $set: {
             url: response.data.model_urls.glb,

@@ -151,9 +151,14 @@ function ModelOptions({ onChange }: { onChange: (url: string) => void }) {
   const [models, setModels] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("/api/list3Dmodels")
-      .then((res) => res.json())
-      .then((res) => setModels(res));
+    const int = setInterval(() => {
+      fetch("/api/list3Dmodels")
+        .then((res) => res.json())
+        .then((res) => setModels(res));
+    }, 1000);
+    return () => {
+      clearInterval(int);
+    }
   }, []);
   console.log(models);
 
@@ -168,6 +173,7 @@ function ModelOptions({ onChange }: { onChange: (url: string) => void }) {
         left: 0,
         width: "100vw",
         p: 2,
+        gap: 2
       }}
       id="twtoidjfs"
     >
@@ -191,25 +197,27 @@ function ModelThumbnail({
   model: any;
   onChange: (url: string) => void;
 }) {
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [url, setUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
-  console.log(model)
-
   return (
     <Box
       sx={{
-        p: 2,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         cursor: "pointer",
-        ":hover": {
-          background: "rgba(0,0,0,0.1)",
-        },
+        width: "64px",
+        height: "64px",
+        zIndex: 100,
+        backgroundColor: "white",
       }}
       onClick={() => {
-        onChange(url);
+        onChange(model.url);
       }}
     >
-      <img src={thumbnail} width={200} />
+      {model.thumbnail ? <img src={model.thumbnail} style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+      }} /> : <CircularProgress />}
     </Box>
   );
 }
