@@ -16,7 +16,6 @@ function ARContainer() {
     return null;
   }
 
-  console.log("loaded");
   return (
     <div sx={{
       margin:0,
