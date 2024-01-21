@@ -4,6 +4,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+    <script>
+        window.addEventListener('message', (event) => {
+            console.log("message received", event.data);
+            let model;
+            let scene;
+            if ("modelId" in event.data) {
+                model = document.getElementById(event.data.modelId);
+            }
+            switch (event.data.type) {
+                case "rotate":
+                    let r = model.getAttribute("rotation");
+                    switch (event.data.dim) {
+                        case "x":
+                            r.x += 90;
+                            r.x %= 360;
+                            break;
+                        case "y":
+                            r.y += 90;
+                            r.y %= 360;
+                            break;
+                        case "z":
+                            r.z += 90;
+                            r.z %= 360;
+                            break;
+                        default:
+                            console.log("weirdo wacko shit");
+                    }
+                    model.setAttribute("rotation", r);
+                    break;
+                case "setPos":
+                    model.setAttribute("position", event.data.pos);
+                    break;
+                case "requestPos":
+                    window.parent.postMessage({"pos": model.getAttribute("position")}, "*");
+                    break;
+                case "createModel":
+                    // modelId, link to model
+                    scene = document.getElementsByTagName("a-scene")[0];
+                    var asset = scene.createElement("a-asset-item");
+                    asset.id = "asset" + event.data.modelId;
+                    asset.setAttribute("src", event.data.src);
+                    break;
+                case "spawnModel":
+                    // modelId
+                    scene = document.getElementsByTagName("a-scene")[0];
+                    var entity = scene.createElement("a-entity");
+                    entity.setAttribute("mindar-face-target", "anchorIndex: 1");
+                    entity.id = "entity" + event.data.modelId;
+                    var modelTag = entity.createElement("a-gltf-model");
+                    modelTag.id = "model" + event.data.modelId;
+                    modelTag.setAttribute("src", "#asset" + event.data.modelId);
+                    modelTag.setAttribute("visible", "true");
+                    break;
+            }
+        })
+    </script>
 </head>
 
 <body>
@@ -32,7 +88,7 @@
         </a-entity>
 
         <a-entity mindar-face-target="anchorIndex: 10">
-            <a-gltf-model rotation="0 -0 0" position="0 1.0 -0.5" scale="0.35 0.35 0.35" src="#hatModel"
+            <a-gltf-model id="hat" rotation="0 0 0" position="0 1.0 -0.5" scale="0.35 0.35 0.35" src="#hatModel"
                 class="hat1-entity" visible="true"></a-gltf-model>
         </a-entity>
         <a-entity mindar-face-occluder mindar-face-target="anchorIndex: 168">
