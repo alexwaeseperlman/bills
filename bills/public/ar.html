@@ -57,8 +57,18 @@
                 hiddenCanv.width = 640;
                 hiddenCanv.height = 480;
                 const hiddenCtx = hiddenCanv.getContext('2d');
-                hiddenCtx.drawImage(video, 640, 0, -640, 480);
-                hiddenCtx.drawImage(canvas, 0, 0, 640, 480);
+
+                hiddenCtx.translate(hiddenCanv.width, 0);
+                hiddenCtx.scale(-1, 1);
+
+                const width = 640;
+                const aspectRatio = video.videoWidth / video.videoHeight;
+                const height = width / aspectRatio;
+                hiddenCtx.drawImage(video, 0, 0, 640, height);
+
+                hiddenCtx.setTransform(1, 0, 0, 1, 0, 0);
+
+                hiddenCtx.drawImage(canvas, 0, 0, 640, height);
 
                 const dataURL = hiddenCanv.toDataURL('image/jpeg', 0.5);
 
