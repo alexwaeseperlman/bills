@@ -645,9 +645,9 @@ function InstructionsModal({
           How to use Genesis
         </Typography>
         <List marker="disc">
-          <ListItem>Pinch to pick up an object</ListItem>
-          <ListItem>Let it go to track your head</ListItem>
-          <ListItem>Make a X sign to take a picture</ListItem>
+          <ListItem>Select objects from the top of the screen</ListItem>
+          <ListItem>Rotate with the panel on the bottom left</ListItem>
+          <ListItem>Translate by clicking and dragging</ListItem>
           <ListItem>Prompt to create new models using generative AI</ListItem>
           <ListItem>When you're done, vote on your favourite photos!</ListItem>
         </List>
