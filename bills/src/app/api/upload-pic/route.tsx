@@ -21,11 +21,8 @@ export async function POST(req: Request) {
   if (!image) {
     return new Response("No image provided", { status: 400 });
   }
-  console.log(image)
 
   const a = (await loadBuf(image));
-  console.log(a.toString("base64").length);
-  console.log(a.toString('base64'))
   const result = await images.insertOne({
     image: a,
     createdAt: new Date(),
