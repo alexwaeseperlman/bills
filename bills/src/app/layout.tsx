@@ -10,7 +10,7 @@ import {
   useTheme,
 } from "@mui/joy";
 import { darkOrange, hoverOrange, orange } from "@bills/theme";
-import { createContext, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Script from "next/script";
 
@@ -23,7 +23,10 @@ function AppBarItem(props: {
   left?: boolean;
   right?: boolean;
 }) {
-  const selected = window.location.pathname === props.href;
+  const [selected, setSelected] = useState(false);
+  useEffect(() => {
+    setSelected(window.location.pathname === props.href);
+  }, [props.href]);
   const color = "white";
 
   return (
@@ -81,7 +84,11 @@ function AppBarItem(props: {
 function AppBar() {
   const ref = useRef<HTMLDivElement>(null);
 
-  const leaderboard = window.location.pathname === "/leaderboard";
+  const [leaderboard, setLeaderboard] = useState(false);
+  useEffect(() => {
+    setLeaderboard(window.location.pathname === "/leaderboard");
+  }, []);
+
 
   return (
     <>
@@ -111,34 +118,16 @@ function AppBar() {
   );
 }
 
-export const aFrameLoadedProvider = createContext(0);
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const theme = useTheme();
-  const [aFrameLoaded, setAFrameLoaded] = useState(0);
   return (
     <html lang="en">
       <head>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
-
-        <Script
-          src="https://aframe.io/releases/1.5.0/aframe.min.js"
-          onLoad={() => {
-            setAFrameLoaded(1);
-          }}
-        ></Script>
-        {aFrameLoaded && (
-          <Script
-            src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"
-            onLoad={() => {
-              setAFrameLoaded(2);
-            }}
-          ></Script>
-        )}
       </head>
       <CssBaseline />
       <body
@@ -147,9 +136,7 @@ export default function RootLayout({
         }}
       >
         <AppBar />
-        <aFrameLoadedProvider.Provider value={aFrameLoaded}>
           {children}
-        </aFrameLoadedProvider.Provider>
       </body>
     </html>
   );

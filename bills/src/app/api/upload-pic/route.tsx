@@ -23,9 +23,8 @@ export async function POST(req: Request) {
   }
 
   const a = (await loadBuf(image));
-  console.log(a.toString("base64").length);
   const result = await images.insertOne({
-    image: a.toString("base64"),
+    image: a,
     createdAt: new Date(),
     upvotes: 0,
   });
