@@ -199,9 +199,9 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
     }}
   >
 
-    <PrimaryButton onClick={() => rotate("x", "hat", sceneRef)}>X 90</PrimaryButton>
-    <PrimaryButton onClick={() => rotate("y", "hat", sceneRef)}>Y 90</PrimaryButton>
-    <PrimaryButton onClick={() => rotate("z", "hat", sceneRef)}>Z 90</PrimaryButton>
+    <PrimaryButton onClick={() => rotate("x", "hat", sceneRef)}>X 20</PrimaryButton>
+    <PrimaryButton onClick={() => rotate("y", "hat", sceneRef)}>Y 20</PrimaryButton>
+    <PrimaryButton onClick={() => rotate("z", "hat", sceneRef)}>Z 20</PrimaryButton>
   </ButtonGroup>
 
 
@@ -642,7 +642,7 @@ function InstructionsModal({
           fontWeight="lg"
           mb={1}
         >
-          How to use BILLS
+          How to use Genesis
         </Typography>
         <List marker="disc">
           <ListItem>Pinch to pick up an object</ListItem>
