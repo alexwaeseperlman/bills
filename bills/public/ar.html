@@ -5,33 +5,45 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
     <script>
+        var sneaky = document.createElement("p");
+        sneaky.style.display = 'none';
+        sneaky.id = "sneakyleaky";
         window.addEventListener('message', (event) => {
             console.log("message received", event.data);
             let model;
             let scene;
             if ("modelId" in event.data) {
-                model = document.getElementById("model" + event.data.modelId);
+                // model = document.getElementById("model" + event.data.modelId);
+                model = document.getElementById("model" + sneaky.innerText);
             }
             switch (event.data.type) {
                 case "rotate":
                     let r = model.getAttribute("rotation");
                     switch (event.data.dim) {
                         case "x":
-                            r.x += 90;
+                            r.x += 20;
                             r.x %= 360;
                             break;
                         case "y":
-                            r.y += 90;
+                            r.y += 20;
                             r.y %= 360;
                             break;
                         case "z":
-                            r.z += 90;
+                            r.z += 20;
                             r.z %= 360;
                             break;
                         default:
                             console.log("weirdo wacko shit");
                     }
                     model.setAttribute("rotation", r);
+                    break;
+                case "scale":
+                    let s = model.getAttribute("scale");
+                    model.setAttribute("scale", {
+                        "x": s.x + event.data.delta,
+                        "y": s.y + event.data.delta,
+                        "z": s.z + event.data.delta
+                    });
                     break;
                 case "setPos":
                     model.setAttribute("position", event.data.pos);
@@ -59,7 +71,9 @@
                     modelTag.id = "model" + event.data.modelId;
                     modelTag.setAttribute("src", "#asset" + event.data.modelId);
                     modelTag.setAttribute("visible", "true");
+                    modelTag.setAttribute("position", {"x": 0, "y": 0, "z": -0.4});
                     entity.appendChild(modelTag);
+                    sneaky.innerText = event.data.modelId;
                     break;
                 case "deleteModel":
                     var entity = document.getElementById("entity" + event.data.modelId);

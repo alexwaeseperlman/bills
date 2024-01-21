@@ -21,7 +21,7 @@ import {
 } from "@mui/joy";
 import { PrimaryButton, PrimaryButtonOutlined, orange } from "@bills/theme";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import { rotate, setPos, requestPos } from "./controlAr";
+import { rotate, setPos, requestPos, scale } from "./controlAr";
 
 function convertToAFrameCoords(x: any, y: any) {
   return {
@@ -40,7 +40,7 @@ function convertToScreenCoords(x: any, y: any) {
 const DummyDiv = ({ sceneRef }) => {
   const [isDragging, setIsDragging] = useState(false);
   const INF = 1000000;
-  const modelRef = useRef({ x: INF, y: INF });
+  const modelRef = useRef({ x: INF, y: INF, z: INF });
   const mouseRef = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: any) => {
@@ -62,6 +62,7 @@ const DummyDiv = ({ sceneRef }) => {
         {
           x: delta.x + modelRef.current.x,
           y: delta.y + modelRef.current.y,
+          z: modelRef.current.z,
         },
         "hat",
         sceneRef
@@ -129,10 +130,19 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
       }
     };
 
+    const onScroll = (event : any) => {
+      console.log(event);
+      console.log(event.deltaY*-0.001);
+      scale(event.deltaY*-0.001, "hat", sceneRef);
+      event.preventDefault();
+    }
+
     window.addEventListener("message", listener);
+    window.addEventListener("wheel", onScroll, {passive: false});
 
     return () => {
       window.removeEventListener("message", listener);
+      window.removeEventListener("wheel", onScroll);
     };
   }, [props.onPictureTaken]);
 
