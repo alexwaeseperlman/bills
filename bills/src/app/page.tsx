@@ -1,11 +1,14 @@
 "use client";
+import Container from "@mui/joy/Container";
+import Slider from "@mui/joy/Slider";
+import Image from "next/image";
+import placeholderImage from "@bills/assets/placeholder.jpg";
+import Button from "@mui/joy/Button";
 import { useContext, useEffect, useRef, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
-  Button,
   CircularProgress,
-  Container,
   IconButton,
   Input,
   List,
@@ -14,10 +17,99 @@ import {
   ModalClose,
   Sheet,
   Typography,
+  ButtonGroup,
 } from "@mui/joy";
 import { PrimaryButton, PrimaryButtonOutlined } from "@bills/theme";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
+// import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
+import { rotate, setPos, requestPos } from "./controlAr";
 
+function convertToAFrameCoords(x: any, y: any) {
+  return {
+    x: (x / window.innerWidth) * 5,
+    y: ((-1 * y) / window.innerHeight) * 5,
+  };
+}
+
+function convertToScreenCoords(x: any, y: any) {
+  return {
+    x: x * window.innerWidth,
+    y: y * window.innerHeight,
+  };
+}
+
+const DummyDiv = ({ sceneRef }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const INF = 1000000;
+  const modelRef = useRef({ x: INF, y: INF });
+  const mouseRef = useRef({ x: 0, y: 0 });
+
+  const handleMouseDown = (e: any) => {
+    console.log(e);
+    mouseRef.current = {
+      x: e.pageX,
+      y: e.pageY,
+    };
+    console.log(mouseRef.current);
+    requestPos("hat", sceneRef);
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: any) => {
+    if (isDragging && modelRef.current.x < INF) {
+      let delta = { x: e.x - mouseRef.current.x, y: e.y - mouseRef.current.y };
+      delta = convertToAFrameCoords(delta.x, delta.y);
+      setPos(
+        {
+          x: delta.x + modelRef.current.x,
+          y: delta.y + modelRef.current.y,
+        },
+        "hat",
+        sceneRef
+      );
+    }
+  };
+
+  const handleMouseUp = (e: any) => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    } else {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    }
+
+    const handleMessage = (event: any) => {
+      console.log("parent received message");
+      if ("pos" in event.data) {
+        modelRef.current = event.data.pos;
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [isDragging]);
+
+  return (
+    <div
+      onMouseDown={handleMouseDown}
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        height: "90vh",
+        width: "100vw",
+      }}
+    ></div>
+  );
+};
 function ARContainer(props: { onPictureTaken: (data: string) => void }) {
   const sceneRef = useRef<HTMLIFrameElement>(null);
 
@@ -49,6 +141,8 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         left: 0,
       }}
     >
+      <DummyDiv sceneRef={sceneRef} />
+
       <iframe
         tabIndex={-1}
         style={{
@@ -60,10 +154,42 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         src={"/ar.html"}
         ref={sceneRef}
       />
+      <ButtonGroup
+        color="primary"
+        variant="solid"
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          margin: "8px 8px 8px 8px",
+        }}
+      >
+        <Button
+          onClick={() => {
+            rotate("x", "hat", sceneRef);
+          }}
+        >
+          X 90
+        </Button>
+        <Button
+          onClick={() => {
+            rotate("y", "hat", sceneRef);
+          }}
+        >
+          Y 90
+        </Button>
+        <Button
+          onClick={() => {
+            rotate("z", "hat", sceneRef);
+          }}
+        >
+          Z 90
+        </Button>
+      </ButtonGroup>
       <Box
         sx={{
           position: "absolute",
-          bottom: "50px",
+          bottom: "0px",
           left: "50%",
           transform: "translate(-50%, -50%)",
         }}
@@ -158,7 +284,7 @@ function ModelOptions({ onChange }: { onChange: (url: string) => void }) {
     }, 1000);
     return () => {
       clearInterval(int);
-    }
+    };
   }, []);
   console.log(models);
 
@@ -173,7 +299,7 @@ function ModelOptions({ onChange }: { onChange: (url: string) => void }) {
         left: 0,
         width: "100vw",
         p: 2,
-        gap: 2
+        gap: 2,
       }}
       id="twtoidjfs"
     >
@@ -213,11 +339,18 @@ function ModelThumbnail({
         onChange(model.url);
       }}
     >
-      {model.thumbnail ? <img src={model.thumbnail} style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-      }} /> : <CircularProgress />}
+      {model.thumbnail ? (
+        <img
+          src={model.thumbnail}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      ) : (
+        <CircularProgress />
+      )}
     </Box>
   );
 }
