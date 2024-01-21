@@ -6,6 +6,7 @@ import Button from "@mui/joy/Button";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Box,
+  CircularProgress,
   IconButton,
   List,
   ListItem,
@@ -14,7 +15,7 @@ import {
   Sheet,
   Typography,
 } from "@mui/joy";
-import { PrimaryButton } from "@bills/theme";
+import { PrimaryButton, PrimaryButtonOutlined } from "@bills/theme";
 import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
@@ -97,7 +98,7 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
   );
 
   function handlePicture() {
-    sceneRef.current!.contentWindow?.postMessage("takePicture", '*');
+    sceneRef.current!.contentWindow?.postMessage("takePicture", "*");
     setFlash(true);
     setTimeout(() => {
       setFlash(false);
@@ -172,31 +173,112 @@ export default function Home() {
         instructionsOpen={instructionsOpen}
         setInstructionsOpen={setInstructionsOpen}
       />
-      <PictureModal
-        picture={picturePopup}
-        setPicture={setPicturePopup}/>
+      <PictureModal picture={picturePopup} setPicture={setPicturePopup} />
     </main>
   );
 }
 
 function PictureModal({
-  picture, setPicture
+  picture,
+  setPicture,
 }: {
-  picture: string | null,
-  setPicture: (pic: string | null) => void,
+  picture: string | null;
+  setPicture: (pic: string | null) => void;
 }) {
-  console.log(picture);
+  const [publishing, setPublishing] = useState(false);
+
   return (
-    <Modal open={!!picture} onClose={() => setPicture(null)}>
-      <Sheet variant="plain" sx={{ maxWidth: '500px', margin: 'auto', borderRadius: 'md', p: 4 }}>
+    <Modal
+      open={!!picture}
+      onClose={() => setPicture(null)}
+      sx={{
+        height: "100vh",
+        display: "flex",
+      }}
+    >
+      <Sheet
+        variant="plain"
+        sx={{ maxWidth: "500px", margin: "auto", borderRadius: "md", p: 4 }}
+      >
         <ModalClose variant="plain" sx={{ m: 1 }} />
-        <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
-          <img src={picture} width={500} height={500} />
+
+        <Typography
+          component="h2"
+          level="h4"
+          textColor="inherit"
+          fontWeight="lg"
+          mb={1}
+        >
+          Here's your photo!
+        </Typography>
+        <Container
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            p: 4,
+          }}
+        >
+          <img src={picture} width={500} />
         </Container>
-        <PrimaryButton onClick={() => setPicture(null)}>Close</PrimaryButton>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <PrimaryButtonOutlined
+            variant="outlined"
+            onClick={() => setPicture(null)}
+          >
+            Discard
+          </PrimaryButtonOutlined>
+          <PrimaryButtonOutlined
+            variant="outlined"
+            onClick={() => {
+              const downloadLink = document.createElement("a");
+              document.body.appendChild(downloadLink);
+
+              downloadLink.href = picture ?? "";
+              downloadLink.target = "_self";
+              downloadLink.download = "bills.jpg";
+              downloadLink.click();
+              document.removeChild(downloadLink);
+            }}
+          >
+            Save
+          </PrimaryButtonOutlined>
+          <PrimaryButton onClick={() => {
+            setPublishing(true);
+            console.log(picture)
+            const a = atob(picture?.replace("data:image/jpeg;base64,", ""));
+            console.log(a)
+            const byteCharacters = atob(picture?.replace("data:image/jpeg;base64,", ""));
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            fetch("/api/upload-pic", {
+              method: "POST",
+              body: new Blob([byteArray]),
+              headers: {
+                "Content-Type": "image/jpeg",
+              },
+            }).then(async (res) => {
+              console.log(await res.text());
+
+              setPublishing(false);
+              setPicture(null);
+            });
+          }}>
+            {publishing ? <CircularProgress /> : "Publish"}
+          </PrimaryButton>
+        </Box>
       </Sheet>
     </Modal>
-  )
+  );
 }
 
 function InstructionsModal({
