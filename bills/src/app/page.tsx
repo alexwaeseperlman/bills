@@ -5,96 +5,111 @@ import Image from "next/image";
 import placeholderImage from "@bills/assets/placeholder.jpg";
 import Button from "@mui/joy/Button";
 import { useContext, useEffect, useRef, useState } from "react";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   CircularProgress,
   IconButton,
+  Input,
+  List,
+  ListItem,
+  Modal,
+  ModalClose,
+  Sheet,
+  Typography,
+  ButtonGroup,
 } from "@mui/joy";
 import { PrimaryButton, PrimaryButtonOutlined } from "@bills/theme";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import { List, ListItem, Modal, ModalClose, Sheet, Typography, ButtonGroup } from "@mui/joy";
 // import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
 import { rotate, setPos, requestPos } from "./controlAr";
 
-function convertToAFrameCoords(x : any, y : any) {
+function convertToAFrameCoords(x: any, y: any) {
   return {
-    "x": x/window.innerWidth * 5,
-    "y": -1*y/window.innerHeight * 5
-  }
+    x: (x / window.innerWidth) * 5,
+    y: ((-1 * y) / window.innerHeight) * 5,
+  };
 }
 
-function convertToScreenCoords(x : any, y : any) {
+function convertToScreenCoords(x: any, y: any) {
   return {
-    "x": x * window.innerWidth,
-    "y": y * window.innerHeight
-  }
+    x: x * window.innerWidth,
+    y: y * window.innerHeight,
+  };
 }
 
 const DummyDiv = ({ sceneRef }) => {
   const [isDragging, setIsDragging] = useState(false);
   const INF = 1000000;
-  const modelRef = useRef({ x : INF, y : INF});
-  const mouseRef = useRef({ x : 0, y : 0});
-  
-  const handleMouseDown = (e : any) => {
+  const modelRef = useRef({ x: INF, y: INF });
+  const mouseRef = useRef({ x: 0, y: 0 });
+
+  const handleMouseDown = (e: any) => {
     console.log(e);
     mouseRef.current = {
-      x: e.pageX, y: e.pageY,
-    }
+      x: e.pageX,
+      y: e.pageY,
+    };
     console.log(mouseRef.current);
     requestPos("hat", sceneRef);
     setIsDragging(true);
-  }
+  };
 
-  const handleMouseMove = (e : any) => {
+  const handleMouseMove = (e: any) => {
     if (isDragging && modelRef.current.x < INF) {
-      let delta = {"x": e.x - mouseRef.current.x, "y": e.y - mouseRef.current.y};
+      let delta = { x: e.x - mouseRef.current.x, y: e.y - mouseRef.current.y };
       delta = convertToAFrameCoords(delta.x, delta.y);
-      setPos({
-        "x": delta.x + modelRef.current.x,
-        "y": delta.y + modelRef.current.y,
-      }, "hat", sceneRef);
+      setPos(
+        {
+          x: delta.x + modelRef.current.x,
+          y: delta.y + modelRef.current.y,
+        },
+        "hat",
+        sceneRef
+      );
     }
-  }
+  };
 
-  const handleMouseUp = (e : any) => {
+  const handleMouseUp = (e: any) => {
     setIsDragging(false);
-  }
+  };
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-    else {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    } else {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     }
 
-    const handleMessage = (event : any) => {
+    const handleMessage = (event: any) => {
       console.log("parent received message");
       if ("pos" in event.data) {
         modelRef.current = event.data.pos;
       }
-    }
+    };
     window.addEventListener("message", handleMessage);
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("message", handleMessage);
-    }
+    };
   }, [isDragging]);
 
   return (
-    <div onMouseDown={handleMouseDown} style={{
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      height: "90vh",
-      width: "100vw",
-    }}></div>
+    <div
+      onMouseDown={handleMouseDown}
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        height: "90vh",
+        width: "100vw",
+      }}
+    ></div>
   );
-}
+};
 function ARContainer(props: { onPictureTaken: (data: string) => void }) {
   const sceneRef = useRef<HTMLIFrameElement>(null);
 
@@ -123,9 +138,10 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         height: "100vh",
         position: "absolute",
         top: 0,
-        left: 0
-      }}>
-      <DummyDiv sceneRef={sceneRef}/>
+        left: 0,
+      }}
+    >
+      <DummyDiv sceneRef={sceneRef} />
 
       <iframe
         tabIndex={-1}
@@ -138,15 +154,37 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         src={"/ar.html"}
         ref={sceneRef}
       />
-      <ButtonGroup color="primary" variant="solid" style={{
-        position: "absolute",
-        left: 0,
-        bottom: 0,
-        margin: "8px 8px 8px 8px"
-      }}>
-      <Button onClick={() => {rotate('x', "hat", sceneRef)}}>X 90</Button>
-      <Button onClick={() => {rotate('y', "hat", sceneRef)}}>Y 90</Button>
-      <Button onClick={() => {rotate('z', "hat", sceneRef)}}>Z 90</Button>
+      <ButtonGroup
+        color="primary"
+        variant="solid"
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          margin: "8px 8px 8px 8px",
+        }}
+      >
+        <Button
+          onClick={() => {
+            rotate("x", "hat", sceneRef);
+          }}
+        >
+          X 90
+        </Button>
+        <Button
+          onClick={() => {
+            rotate("y", "hat", sceneRef);
+          }}
+        >
+          Y 90
+        </Button>
+        <Button
+          onClick={() => {
+            rotate("z", "hat", sceneRef);
+          }}
+        >
+          Z 90
+        </Button>
       </ButtonGroup>
       <Box
         sx={{
@@ -194,13 +232,148 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
 }
 
 export default function Home() {
+  const [inputPrompt, setInputPrompt] = useState("");
+  const [newPromptOpen, setNewPromptOpen] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [picturePopup, setPicturePopup] = useState<string | null>(null);
+  const [modelUrl, setModelUrl] = useState<string | null>(null);
+
+  return (
+    <main>
+      <ModelOptions onChange={(url) => setModelUrl(url)} />
+      <ARContainer
+        onPictureTaken={(pic) => {
+          setPicturePopup(pic);
+        }}
+      />
+      <InstructionsModal
+        instructionsOpen={instructionsOpen}
+        setInstructionsOpen={setInstructionsOpen}
+      />
+      <PictureModal picture={picturePopup} setPicture={setPicturePopup} />
+
+      <div
+        style={{
+          position: "fixed",
+          left: "50%",
+          bottom: "20px",
+          transform: "translateX(-50%)",
+        }}
+      >
+        <PrimaryButton onClick={() => setNewPromptOpen(true)}>
+          New Prompt
+        </PrimaryButton>
+      </div>
+
+      <PromptModal
+        promptOpen={newPromptOpen}
+        setPromptOpen={setNewPromptOpen}
+      />
+    </main>
+  );
+}
+
+function ModelOptions({ onChange }: { onChange: (url: string) => void }) {
+  const [models, setModels] = useState<any[]>([]);
+
+  useEffect(() => {
+    const int = setInterval(() => {
+      fetch("/api/list3Dmodels")
+        .then((res) => res.json())
+        .then((res) => setModels(res));
+    }, 1000);
+    return () => {
+      clearInterval(int);
+    };
+  }, []);
+  console.log(models);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        p: 2,
+        gap: 2,
+      }}
+      id="twtoidjfs"
+    >
+      {models.map((model, i) => (
+        <ModelThumbnail
+          key={i}
+          model={model}
+          onChange={(url) => {
+            onChange(url);
+          }}
+        />
+      ))}
+    </Box>
+  );
+}
+
+function ModelThumbnail({
+  model,
+  onChange,
+}: {
+  model: any;
+  onChange: (url: string) => void;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        cursor: "pointer",
+        width: "64px",
+        height: "64px",
+        zIndex: 100,
+        backgroundColor: "white",
+      }}
+      onClick={() => {
+        onChange(model.url);
+      }}
+    >
+      {model.thumbnail ? (
+        <img
+          src={model.thumbnail}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      ) : (
+        <CircularProgress />
+      )}
+    </Box>
+  );
+}
+
+function PromptModal({
+  promptOpen,
+  setPromptOpen,
+}: {
+  promptOpen: boolean;
+  setPromptOpen: (open: boolean) => void;
+}) {
+  const [inputPrompt, setInputPrompt] = useState("");
+  const [newPromptOpen, setNewPromptOpen] = useState(false);
+
   const callBackendApi = async () => {
+    console.log(inputPrompt);
     try {
       const response = await fetch("/api/create3Dmodel", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ prompt: inputPrompt }),
       });
 
       if (!response.ok) {
@@ -232,7 +405,7 @@ export default function Home() {
             setTimeout(pollFor3DModel, pollInterval);
           } else {
             const modelUrl = data.model_urls.glb;
-            const thumbnailUrl = data.thumbnail_url;
+            console.log("3D Model URL:", modelUrl);
           }
         } catch (error) {
           console.error("There was an error:", error);
@@ -247,21 +420,50 @@ export default function Home() {
 
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [picturePopup, setPicturePopup] = useState<string | null>(null);
+  const handleKeyPress = (e: any) => {
+    if (e.key === "Enter") {
+      callBackendApi();
+    }
+  };
 
   return (
-    <main>
-      <button onClick={callBackendApi}>Make API Call</button>
-      <ARContainer
-        onPictureTaken={(pic) => {
-          setPicturePopup(pic);
-        }}
-      />
-      <InstructionsModal
-        instructionsOpen={instructionsOpen}
-        setInstructionsOpen={setInstructionsOpen}
-      />
-      <PictureModal picture={picturePopup} setPicture={setPicturePopup} />
-    </main>
+    <Modal
+      open={promptOpen}
+      onClose={() => setPromptOpen(false)}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Sheet
+        variant="plain"
+        sx={{ maxWidth: "500px", margin: "auto", borderRadius: "md", p: 4 }}
+      >
+        <Typography
+          component="h2"
+          level="h4"
+          textColor="inherit"
+          fontWeight="lg"
+          mb={1}
+        >
+          Enter a prompt to create a new model
+        </Typography>
+        <Input
+          placeholder="Enter your prompt"
+          value={inputPrompt}
+          onChange={(e) => setInputPrompt(e.target.value)}
+          onKeyPress={handleKeyPress}
+          sx={{ marginBottom: 2, borderRadius: 15, padding: 1.5 }}
+          endDecorator={
+            <SearchIcon
+              onClick={() => callBackendApi()}
+              sx={{ cursor: "pointer" }}
+            />
+          }
+        />
+      </Sheet>
+    </Modal>
   );
 }
 
@@ -337,30 +539,34 @@ function PictureModal({
           >
             Save
           </PrimaryButtonOutlined>
-          <PrimaryButton onClick={() => {
-            setPublishing(true);
-            console.log(picture)
-            const a = atob(picture?.replace("data:image/jpeg;base64,", ""));
-            console.log(a)
-            const byteCharacters = atob(picture?.replace("data:image/jpeg;base64,", ""));
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            fetch("/api/upload-pic", {
-              method: "POST",
-              body: new Blob([byteArray]),
-              headers: {
-                "Content-Type": "image/jpeg",
-              },
-            }).then(async (res) => {
-              console.log(await res.text());
+          <PrimaryButton
+            onClick={() => {
+              setPublishing(true);
+              console.log(picture);
+              const a = atob(picture?.replace("data:image/jpeg;base64,", ""));
+              console.log(a);
+              const byteCharacters = atob(
+                picture?.replace("data:image/jpeg;base64,", "")
+              );
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              fetch("/api/upload-pic", {
+                method: "POST",
+                body: new Blob([byteArray]),
+                headers: {
+                  "Content-Type": "image/jpeg",
+                },
+              }).then(async (res) => {
+                console.log(await res.text());
 
-              setPublishing(false);
-              setPicture(null);
-            });
-          }}>
+                setPublishing(false);
+                setPicture(null);
+              });
+            }}
+          >
             {publishing ? <CircularProgress /> : "Publish"}
           </PrimaryButton>
         </Box>
