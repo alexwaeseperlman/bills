@@ -1,10 +1,13 @@
 "use client";
 import { useContext, useEffect, useRef, useState } from "react";
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
+  Button,
   CircularProgress,
+  Container,
   IconButton,
+  Input,
   List,
   ListItem,
   Modal,
@@ -103,15 +106,64 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
 }
 
 export default function Home() {
+  const [inputPrompt, setInputPrompt] = useState("");
+  const [newPromptOpen, setNewPromptOpen] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [picturePopup, setPicturePopup] = useState<string | null>(null);
+
+  return (
+    <main>
+      <ARContainer
+        onPictureTaken={(pic) => {
+          setPicturePopup(pic);
+        }}
+      />
+      <InstructionsModal
+        instructionsOpen={instructionsOpen}
+        setInstructionsOpen={setInstructionsOpen}
+      />
+      <PictureModal picture={picturePopup} setPicture={setPicturePopup} />
+
+      <div
+        style={{
+          position: "fixed",
+          left: "50%",
+          bottom: "20px",
+          transform: "translateX(-50%)",
+        }}
+      >
+        <PrimaryButton onClick={() => setNewPromptOpen(true)}>
+          New Prompt
+        </PrimaryButton>
+      </div>
+
+      <PromptModal
+        promptOpen={newPromptOpen}
+        setPromptOpen={setNewPromptOpen}
+      />
+    </main>
+  );
+}
+
+function PromptModal({
+  promptOpen,
+  setPromptOpen,
+}: {
+  promptOpen: boolean;
+  setPromptOpen: (open: boolean) => void;
+}) {
+  const [inputPrompt, setInputPrompt] = useState("");
+  const [newPromptOpen, setNewPromptOpen] = useState(false);
+
   const callBackendApi = async () => {
-    console.log(inputPrompt)
+    console.log(inputPrompt);
     try {
       const response = await fetch("/api/create3Dmodel", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({prompt: inputPrompt}),
+        body: JSON.stringify({ prompt: inputPrompt }),
       });
 
       if (!response.ok) {
@@ -143,7 +195,7 @@ export default function Home() {
             setTimeout(pollFor3DModel, pollInterval);
           } else {
             const modelUrl = data.model_urls.glb;
-            console.log('3D Model URL:', modelUrl);
+            console.log("3D Model URL:", modelUrl);
           }
         } catch (error) {
           console.error("There was an error:", error);
@@ -158,69 +210,50 @@ export default function Home() {
 
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [picturePopup, setPicturePopup] = useState<string | null>(null);
+  const handleKeyPress = (e: any) => {
+    if (e.key === "Enter") {
+      callBackendApi();
+    }
+  };
 
   return (
-    <main>
-      <button onClick={callBackendApi}>Make API Call</button>
-      <ARContainer
-        onPictureTaken={(pic) => {
-          setPicturePopup(pic);
-        }}
-      />
-      <InstructionsModal
-        instructionsOpen={instructionsOpen}
-        setInstructionsOpen={setInstructionsOpen}
-      />
-      <PictureModal picture={picturePopup} setPicture={setPicturePopup} />
-      
- 
-      <div style={{
-        position: 'fixed',
-        left: '50%', 
-        bottom: '20px', 
-        transform: 'translateX(-50%)'
-      }}>
-
-      <Button onClick={() => setNewPromptOpen(true)}>New Prompt</Button>
-      </div>
-
-      <Modal
-        open={newPromptOpen}
-        onClose={() => setNewPromptOpen(false)}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
+    <Modal
+      open={promptOpen}
+      onClose={() => setPromptOpen(false)}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Sheet
+        variant="plain"
+        sx={{ maxWidth: "500px", margin: "auto", borderRadius: "md", p: 4 }}
       >
-
-        <Box
-          sx={{
-            backgroundColor: 'background.paper',
-            boxShadow: 24,
-            p: 3,
-            borderRadius: 2,
-            minWidth: 300,
-          }}
+        <Typography
+          component="h2"
+          level="h4"
+          textColor="inherit"
+          fontWeight="lg"
+          mb={1}
         >
-
-    <Input
-        placeholder="Enter your prompt"
-        value={inputPrompt}
-        onChange={(e) => setInputPrompt(e.target.value)}
-        onKeyPress={handleKeyPress}
-        sx={{ marginBottom: 2, borderRadius: 15, padding: 1.5 }}
-        endDecorator={(
-          <SearchIcon 
-            onClick={() => callBackendApi()} 
-            sx={{ cursor: 'pointer' }} 
-          />
-        )}
-      />
-
-      </Box>
-      </Modal>
-    </main>
+          Enter a prompt to create a new model
+        </Typography>
+        <Input
+          placeholder="Enter your prompt"
+          value={inputPrompt}
+          onChange={(e) => setInputPrompt(e.target.value)}
+          onKeyPress={handleKeyPress}
+          sx={{ marginBottom: 2, borderRadius: 15, padding: 1.5 }}
+          endDecorator={
+            <SearchIcon
+              onClick={() => callBackendApi()}
+              sx={{ cursor: "pointer" }}
+            />
+          }
+        />
+      </Sheet>
+    </Modal>
   );
 }
 
@@ -296,30 +329,34 @@ function PictureModal({
           >
             Save
           </PrimaryButtonOutlined>
-          <PrimaryButton onClick={() => {
-            setPublishing(true);
-            console.log(picture)
-            const a = atob(picture?.replace("data:image/jpeg;base64,", ""));
-            console.log(a)
-            const byteCharacters = atob(picture?.replace("data:image/jpeg;base64,", ""));
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            fetch("/api/upload-pic", {
-              method: "POST",
-              body: new Blob([byteArray]),
-              headers: {
-                "Content-Type": "image/jpeg",
-              },
-            }).then(async (res) => {
-              console.log(await res.text());
+          <PrimaryButton
+            onClick={() => {
+              setPublishing(true);
+              console.log(picture);
+              const a = atob(picture?.replace("data:image/jpeg;base64,", ""));
+              console.log(a);
+              const byteCharacters = atob(
+                picture?.replace("data:image/jpeg;base64,", "")
+              );
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              fetch("/api/upload-pic", {
+                method: "POST",
+                body: new Blob([byteArray]),
+                headers: {
+                  "Content-Type": "image/jpeg",
+                },
+              }).then(async (res) => {
+                console.log(await res.text());
 
-              setPublishing(false);
-              setPicture(null);
-            });
-          }}>
+                setPublishing(false);
+                setPicture(null);
+              });
+            }}
+          >
             {publishing ? <CircularProgress /> : "Publish"}
           </PrimaryButton>
         </Box>
