@@ -46,7 +46,7 @@ function AppBarItem(props: {
         alignItems: "center",
         backgroundColor: orange,
         height: "100%",
-        p: 2,
+        p: 1,
         whiteSpace: "nowrap",
 
         ...(props.left
@@ -97,7 +97,6 @@ function AppBar() {
     <>
       <Box
         sx={(theme) => ({
-          height: "50px",
           alignItems: "stretch",
           display: "flex",
           zIndex: 2,

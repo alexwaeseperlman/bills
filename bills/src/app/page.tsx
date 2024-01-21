@@ -19,7 +19,13 @@ import {
   Typography,
   ButtonGroup,
 } from "@mui/joy";
-import { PrimaryButton, PrimaryButtonOutlined } from "@bills/theme";
+import { PrimaryButton, 
+  PrimaryButtonOutlined, 
+  darkHoverOrange,
+  darkOrange,
+  hoverOrange,
+  orange } from "@bills/theme";
+
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 // import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
 import { rotate, setPos, requestPos } from "./controlAr";
@@ -154,39 +160,30 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         src={"/ar.html"}
         ref={sceneRef}
       />
-      <ButtonGroup
-        color="primary"
-        variant="solid"
-        style={{
-          position: "absolute",
-          left: 0,
-          bottom: 0,
-          margin: "8px 8px 8px 8px",
-        }}
-      >
-        <Button
-          onClick={() => {
-            rotate("x", "hat", sceneRef);
-          }}
-        >
-          X 90
-        </Button>
-        <Button
-          onClick={() => {
-            rotate("y", "hat", sceneRef);
-          }}
-        >
-          Y 90
-        </Button>
-        <Button
-          onClick={() => {
-            rotate("z", "hat", sceneRef);
-          }}
-        >
-          Z 90
-        </Button>
-      </ButtonGroup>
-      <Box
+
+
+
+  <ButtonGroup
+    color="primary"
+    orientation="vertical"
+    variant="solid"
+    style={{
+      backgroundColor: orange, // Make sure 'orange' is a valid CSS color
+      position: "absolute",
+      left: 0,
+      bottom: 0,
+      margin: "8px 8px 8px 8px",
+    }}
+  >
+
+    <PrimaryButton onClick={() => rotate("x", "hat", sceneRef)}>X 90</PrimaryButton>
+    <PrimaryButton onClick={() => rotate("y", "hat", sceneRef)}>Y 90</PrimaryButton>
+    <PrimaryButton onClick={() => rotate("z", "hat", sceneRef)}>Z 90</PrimaryButton>
+  </ButtonGroup>
+
+
+      <Box 
+        textAlign={'center'}
         sx={{
           position: "absolute",
           bottom: "0px",
@@ -199,12 +196,13 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
             borderRadius: "50%",
             width: "64px",
             height: "64px",
+            margin: "12px",
           }}
           onClick={() => handlePicture()}
           variant="soft"
           size="lg"
         >
-          <CameraAltIcon />
+          <CameraAltIcon/>
         </IconButton>
       </Box>
       <div
@@ -256,13 +254,17 @@ export default function Home() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: "20px",
+          bottom: 0,
+          margin: "8px 8px 8px 8px",
           transform: "translateX(-50%)",
         }}
       >
+
+      <Box textAlign='center'>
         <PrimaryButton onClick={() => setNewPromptOpen(true)}>
           New Prompt
         </PrimaryButton>
+        </Box>
       </div>
 
       <PromptModal
@@ -364,9 +366,11 @@ function PromptModal({
 }) {
   const [inputPrompt, setInputPrompt] = useState("");
   const [newPromptOpen, setNewPromptOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const callBackendApi = async () => {
     console.log(inputPrompt);
+    setIsLoading(true);
     try {
       const response = await fetch("/api/create3Dmodel", {
         method: "POST",
@@ -404,6 +408,7 @@ function PromptModal({
           if (data.status !== "SUCCEEDED") {
             setTimeout(pollFor3DModel, pollInterval);
           } else {
+            setIsLoading(false);
             const modelUrl = data.model_urls.glb;
             console.log("3D Model URL:", modelUrl);
           }
@@ -462,6 +467,14 @@ function PromptModal({
             />
           }
         />
+
+        {isLoading ? (
+          <CircularProgress
+            color="neutral"
+            size="lg"
+            variant="solid"
+          />
+        ) : (null)}
       </Sheet>
     </Modal>
   );
