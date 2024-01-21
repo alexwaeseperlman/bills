@@ -138,7 +138,12 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         src={"/ar.html"}
         ref={sceneRef}
       />
-      <ButtonGroup>
+      <ButtonGroup color="primary" variant="solid" style={{
+        position: "absolute",
+        left: 0,
+        bottom: 0,
+        margin: "8px 8px 8px 8px"
+      }}>
       <Button onClick={() => {rotate('x', "hat", sceneRef)}}>X 90</Button>
       <Button onClick={() => {rotate('y', "hat", sceneRef)}}>Y 90</Button>
       <Button onClick={() => {rotate('z', "hat", sceneRef)}}>Z 90</Button>
@@ -146,7 +151,7 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
       <Box
         sx={{
           position: "absolute",
-          bottom: "50px",
+          bottom: "0px",
           left: "50%",
           transform: "translate(-50%, -50%)",
         }}
