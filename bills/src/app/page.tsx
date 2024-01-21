@@ -1,12 +1,9 @@
 "use client";
-import Container from "@mui/joy/Container";
-import Image from "next/image";
-import placeholderImage from "@bills/assets/placeholder.jpg";
-import Button from "@mui/joy/Button";
 import { useContext, useEffect, useRef, useState } from "react";
-import { List, ListItem, Modal, ModalClose, Sheet, Typography } from "@mui/joy";
+import { List, ListItem, Modal, Button, Box, Input, ModalClose, Sheet, Typography } from "@mui/joy";
 import { PrimaryButton } from "@bills/theme";
 import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
+import SearchIcon from '@mui/icons-material/Search';
 
 function ARContainer() {
   const sceneRef = useRef(null);
@@ -38,12 +35,14 @@ function ARContainer() {
 export default function Home() {
 
   const callBackendApi = async () => {
+    console.log(inputPrompt)
     try {
       const response = await fetch('/api/create3Dmodel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({prompt: inputPrompt}),
       });
       
       if (!response.ok) {
@@ -77,7 +76,7 @@ export default function Home() {
           } else {
 
             const modelUrl = data.model_urls.glb;
-            const thumbnailUrl = data.thumbnail_url;
+            console.log('3D Model URL:', modelUrl);
           }
         } catch (error) {
           console.error('There was an error:', error);
@@ -92,10 +91,66 @@ export default function Home() {
   }  
 
   const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [newPromptOpen, setNewPromptOpen] = useState(false);
+  const [inputPrompt, setInputPrompt] = useState('');
+
+  const handleKeyPress = (e: any) => {
+    if (e.key === 'Enter') {
+      callBackendApi();
+    }
+  }
   return (
     <main>
-      <button onClick={callBackendApi}>Make API Call</button>
+
       <ARContainer />
+ 
+      <div style={{
+        position: 'fixed',
+        left: '50%', 
+        bottom: '20px', 
+        transform: 'translateX(-50%)'
+      }}>
+
+      <Button onClick={() => setNewPromptOpen(true)}>New Prompt</Button>
+      </div>
+
+      <Modal
+        open={newPromptOpen}
+        onClose={() => setNewPromptOpen(false)}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+
+        <Box
+          sx={{
+            backgroundColor: 'background.paper',
+            boxShadow: 24,
+            p: 3,
+            borderRadius: 2,
+            minWidth: 300,
+          }}
+        >
+
+    <Input
+        placeholder="Enter your prompt"
+        value={inputPrompt}
+        onChange={(e) => setInputPrompt(e.target.value)}
+        onKeyPress={handleKeyPress}
+        sx={{ marginBottom: 2, borderRadius: 15, padding: 1.5 }}
+        endDecorator={(
+          <SearchIcon 
+            onClick={() => callBackendApi()} 
+            sx={{ cursor: 'pointer' }} 
+          />
+        )}
+      />
+
+      </Box>
+      </Modal>
+
       <Modal
         open={instructionsOpen}
         onClose={() => setInstructionsOpen(false)}
@@ -113,6 +168,7 @@ export default function Home() {
             p: 4,
           }}
         >
+
           <ModalClose variant="plain" sx={{ m: 1 }} />
           <Typography
             component="h2"
@@ -135,6 +191,8 @@ export default function Home() {
           <PrimaryButton onClick={() => setInstructionsOpen(false)}>Let me cook 😤</PrimaryButton>
         </Sheet>
       </Modal>
+
+
     </main>
   );
 }
