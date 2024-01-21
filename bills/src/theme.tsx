@@ -12,3 +12,12 @@ export const PrimaryButton = styled(Button)(({ theme }) => ({
     backgroundColor: hoverOrange,
   },
 }));
+
+export const PrimaryButtonOutlined = styled(Button)(({ theme }) => ({
+  border: `1px solid ${orange}`,
+  color: orange,
+  transition: "background-color 0.1s ease-out",
+  ":hover": {
+    backgroundColor: hoverOrange,
+  },
+}));

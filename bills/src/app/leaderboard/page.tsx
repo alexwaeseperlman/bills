@@ -1,6 +1,20 @@
 "use client";
-import { PrimaryButton, darkHoverOrange, darkOrange, hoverOrange, orange } from "@bills/theme";
-import { AspectRatio, Box, Button, Card, CardContent, CardOverflow } from "@mui/joy";
+import {
+  PrimaryButton,
+  darkHoverOrange,
+  darkOrange,
+  hoverOrange,
+  orange,
+} from "@bills/theme";
+import {
+  AspectRatio,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardOverflow,
+} from "@mui/joy";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -23,8 +37,11 @@ function PicCard({
     localStorage.setItem(id + "-upvoted", (!!upvoted).toString());
   }, [upvoted]);
 
+  console.log(image)
   return (
-    <Card sx={{ width: "100%", maxWidth: "300px", m: 2 }}>
+    <Card
+      sx={{ width: "100%", maxWidth: "300px", m: 2, justifyItems: "center" }}
+    >
       <CardOverflow>
         <AspectRatio ratio="1">
           <Image
@@ -34,27 +51,27 @@ function PicCard({
           />
         </AspectRatio>
       </CardOverflow>
-      <CardContent>
-        <p>{upvotes} upvote{upvotes != 1 ? 's' : ''}</p>
-      </CardContent>
-      <CardOverflow>
-        <PrimaryButton
-          onClick={() => {
-            setUpvoted(!upvoted);
-            upvote(upvoted ? -1 : 1);
-          }}
-          color={upvoted ? "neutral" : "primary"}
-          sx={{
-            backgroundColor: upvoted ? darkOrange : orange,
-            transition: "background-color 0.1s ease-out",
-            ":hover": {
-              backgroundColor: upvoted ? darkHoverOrange : hoverOrange,
-            },
-          }}
-        >
-          {!upvoted ? "Upvote" : "Remove upvote"}{" "}
-        </PrimaryButton>
-      </CardOverflow>
+      <PrimaryButton
+        onClick={() => {
+          setUpvoted(!upvoted);
+          upvote(upvoted ? -1 : 1);
+        }}
+        color={upvoted ? "neutral" : "primary"}
+        sx={{
+          backgroundColor: upvoted ? "white" : orange,
+          color: upvoted ? orange : "white",
+          border: upvoted ? `1px solid ${orange}` : "none",
+          transition:
+            "background-color 0.1s ease-out, color 0.1s ease-out, border-color 0.1s ease-out",
+          ":hover": {
+            backgroundColor: upvoted ? "white" : hoverOrange,
+            border: upvoted ? `1px solid ${darkHoverOrange}` : "none",
+            color: upvoted ? darkHoverOrange : "inherit",
+          },
+        }}
+      >
+        <ArrowDropUpIcon /> {!upvoted ? "Upvote" : "Upvoted"} {upvotes}
+      </PrimaryButton>
     </Card>
   );
 }
@@ -73,17 +90,20 @@ export default function Home() {
   return (
     <main>
       <Box
-        sx={theme => ({
+        sx={(theme) => ({
           display: "flex",
           flexWrap: "wrap",
           width: "100%",
           [theme.breakpoints.down("sm")]: {
             justifyContent: "center",
           },
-          
         })}
       >
-        {pics.map((pic) => (
+        {pics.map((pic: {
+          image: string;
+          upvotes: number;
+          _id: string;
+        }) => (
           <PicCard
             image={pic.image}
             upvotes={pic.upvotes}
