@@ -17,79 +17,84 @@ function ARContainer() {
   }
 
   return (
-    <div style={{
-      margin:0,
-      padding:0,
-    }}>
-      <iframe style={{
+    <div
+      style={{
+        margin: 0,
+        padding: 0,
+        overflow: "hidden",
         width: "100vw",
         height: "100vh",
         position: "absolute",
         top: 0,
         left: 0,
-        padding:0,
-        margin:0,
-      }} src={'/ar.html'} ref={sceneRef} />
+      }}
+    >
+      <iframe
+        tabIndex={-1}
+        style={{
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+        }}
+        scrolling="no"
+        src={"/ar.html"}
+        ref={sceneRef}
+      />
     </div>
   );
 }
 
-
 export default function Home() {
-
   const callBackendApi = async () => {
     try {
-      const response = await fetch('/api/create3Dmodel', {
-        method: 'POST',
+      const response = await fetch("/api/create3Dmodel", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
-      
+
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
-  
+
       const data = await response.json();
       console.log(data);
       const taskId = data.result;
-  
-      const pollInterval = 2000; 
+
+      const pollInterval = 2000;
       const pollFor3DModel = async () => {
         try {
           const response = await fetch(`/api/get3Dmodel?taskId=${taskId}`, {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           });
-  
+
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error("Network response was not ok");
           }
-  
+
           const data = await response.json();
           console.log(data);
-  
-          if (data.status !== 'SUCCEEDED') {
 
+          if (data.status !== "SUCCEEDED") {
             setTimeout(pollFor3DModel, pollInterval);
           } else {
-
             const modelUrl = data.model_urls.glb;
             const thumbnailUrl = data.thumbnail_url;
           }
         } catch (error) {
-          console.error('There was an error:', error);
+          console.error("There was an error:", error);
         }
       };
 
       setTimeout(pollFor3DModel, pollInterval);
-  
     } catch (error) {
-      console.error('There was an error:', error);
+      console.error("There was an error:", error);
     }
-  }  
+  };
 
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   return (
@@ -132,7 +137,9 @@ export default function Home() {
               When you're done, vote on your favourite photos!
             </ListItem>
           </List>
-          <PrimaryButton onClick={() => setInstructionsOpen(false)}>Let me cook 😤</PrimaryButton>
+          <PrimaryButton onClick={() => setInstructionsOpen(false)}>
+            Let me cook 😤
+          </PrimaryButton>
         </Sheet>
       </Modal>
     </main>

@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.5",
     "@mui/joy": "^5.0.0-beta.23",
     "@next/swc-darwin-arm64": "^14.1.0",
     "mongodb": "^6.3.0",
