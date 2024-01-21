@@ -16,11 +16,11 @@ export async function POST(request: NextRequest) {
 
   const payload = {
     object_prompt: prompt,
-    style_prompt: prompt,
+    style_prompt: "high quality, high resolution, high poly, beautiful",
     enable_pbr: true,
     resolution: "1024",
-    art_style: "fake-3d-cartoon",
-    negative_prompt: "low quality, low resolution, low poly, ugly",
+    art_style: "realistic",
+    negative_prompt: "low quality, low resolution, low poly, ugly, full body",
   };
 
   try {
