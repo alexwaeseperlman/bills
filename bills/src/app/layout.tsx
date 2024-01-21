@@ -101,7 +101,7 @@ function AppBar() {
         <AppBarItem
           right
           left
-          label={leaderboard ? "Go to home" : "Go to leaderboard"}
+          label={leaderboard ? "Back to Home" : "Leaderboard"}
           href={leaderboard ? "/" : "/leaderboard"}
         />
       </Box>

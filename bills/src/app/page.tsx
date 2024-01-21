@@ -4,13 +4,70 @@ import Image from "next/image";
 import placeholderImage from "@bills/assets/placeholder.jpg";
 import Button from "@mui/joy/Button";
 import { useState } from "react";
-import { List, ListItem, Modal, ModalClose, Sheet, Typography } from "@mui/joy";
+import { List, ListItem, Modal, ModalClose, ModalDialog, Sheet, Typography } from "@mui/joy";
 import { PrimaryButton } from "@bills/theme";
 
+
 export default function Home() {
+
+  const callBackendApi = async () => {
+    try {
+      const response = await fetch('/api/create3Dmodel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const data = await response.json();
+      console.log(data);
+      const taskId = data.result;
+  
+      const pollInterval = 2000; 
+      const pollFor3DModel = async () => {
+        try {
+          const response = await fetch(`/api/get3Dmodel?taskId=${taskId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+  
+          const data = await response.json();
+          console.log(data);
+  
+          if (data.status !== 'SUCCEEDED') {
+
+            setTimeout(pollFor3DModel, pollInterval);
+          } else {
+
+            const modelUrl = data.model_urls.glb;
+            const thumbnailUrl = data.thumbnail_url;
+          }
+        } catch (error) {
+          console.error('There was an error:', error);
+        }
+      };
+
+      setTimeout(pollFor3DModel, pollInterval);
+  
+    } catch (error) {
+      console.error('There was an error:', error);
+    }
+  }  
+
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   return (
     <main>
+      <button onClick={callBackendApi}>Make API Call</button>
       <Image
         src={placeholderImage}
         alt="placeholder"
@@ -53,7 +110,7 @@ export default function Home() {
             <ListItem>Prompt to create new models using generative AI</ListItem>
             <ListItem>When you're done, vote on your favourite photos!</ListItem>
           </List>
-          <PrimaryButton onClick={() => setInstructionsOpen(false)}>Got it</PrimaryButton>
+          <PrimaryButton onClick={() => setInstructionsOpen(false)}>Let me cook 😤</PrimaryButton>
         </Sheet>
       </Modal>
     </main>
