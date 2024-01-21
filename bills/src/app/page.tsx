@@ -19,9 +19,8 @@ import {
   Typography,
   ButtonGroup,
 } from "@mui/joy";
-import { PrimaryButton, PrimaryButtonOutlined } from "@bills/theme";
+import { PrimaryButton, PrimaryButtonOutlined, orange } from "@bills/theme";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-// import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
 import { rotate, setPos, requestPos } from "./controlAr";
 
 function convertToAFrameCoords(x: any, y: any) {
@@ -110,6 +109,15 @@ const DummyDiv = ({ sceneRef }) => {
     ></div>
   );
 };
+const ids = {};
+function getId(url: string) {
+  if (ids[url]) {
+    return ids[url];
+  }
+  const id = Math.random().toString(36).substring(7);
+  ids[url] = id;
+  return id;
+}
 function ARContainer(props: { onPictureTaken: (data: string) => void }) {
   const sceneRef = useRef<HTMLIFrameElement>(null);
 
@@ -143,6 +151,14 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
     >
       <DummyDiv sceneRef={sceneRef} />
 
+      <ModelOptions
+        onChange={(url) => {
+          sceneRef.current!.contentWindow?.postMessage(
+            { type: "createModel", src: url, modelId: getId(url) },
+            "*"
+          );
+        }}
+      />
       <iframe
         tabIndex={-1}
         style={{
@@ -158,33 +174,34 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
         color="primary"
         variant="solid"
         style={{
+          backgroundColor: orange,
           position: "absolute",
           left: 0,
           bottom: 0,
           margin: "8px 8px 8px 8px",
         }}
       >
-        <Button
+        <PrimaryButton
           onClick={() => {
             rotate("x", "hat", sceneRef);
           }}
         >
           X 90
-        </Button>
-        <Button
+        </PrimaryButton>
+        <PrimaryButton
           onClick={() => {
             rotate("y", "hat", sceneRef);
           }}
         >
           Y 90
-        </Button>
-        <Button
+        </PrimaryButton>
+        <PrimaryButton
           onClick={() => {
             rotate("z", "hat", sceneRef);
           }}
         >
           Z 90
-        </Button>
+        </PrimaryButton>
       </ButtonGroup>
       <Box
         sx={{
@@ -236,11 +253,9 @@ export default function Home() {
   const [newPromptOpen, setNewPromptOpen] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [picturePopup, setPicturePopup] = useState<string | null>(null);
-  const [modelUrl, setModelUrl] = useState<string | null>(null);
 
   return (
     <main>
-      <ModelOptions onChange={(url) => setModelUrl(url)} />
       <ARContainer
         onPictureTaken={(pic) => {
           setPicturePopup(pic);
