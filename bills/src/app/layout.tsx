@@ -124,21 +124,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
-
-        <Script
-          src="https://aframe.io/releases/1.5.0/aframe.min.js"
-          onLoad={() => {
-            setAFrameLoaded(1);
-          }}
-        ></Script>
-        {aFrameLoaded && (
-          <Script
-            src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"
-            onLoad={() => {
-              setAFrameLoaded(2);
-            }}
-          ></Script>
-        )}
       </head>
       <CssBaseline />
       <body
