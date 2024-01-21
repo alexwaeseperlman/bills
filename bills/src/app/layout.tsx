@@ -10,7 +10,9 @@ import {
   useTheme,
 } from "@mui/joy";
 import { darkOrange, hoverOrange, orange } from "@bills/theme";
-import { useRef } from "react";
+import { createContext, useRef, useState } from "react";
+import Head from "next/head";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 const gradient = `linear-gradient(90deg, #ffffff 0%, #f7f2f2 100%)`;
@@ -109,23 +111,45 @@ function AppBar() {
   );
 }
 
+export const aFrameLoadedProvider = createContext(0);
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const theme = useTheme();
+  const [aFrameLoaded, setAFrameLoaded] = useState(0);
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+
+        <Script
+          src="https://aframe.io/releases/1.5.0/aframe.min.js"
+          onLoad={() => {
+            setAFrameLoaded(1);
+          }}
+        ></Script>
+        {aFrameLoaded && (
+          <Script
+            src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"
+            onLoad={() => {
+              setAFrameLoaded(2);
+            }}
+          ></Script>
+        )}
+      </head>
       <CssBaseline />
-      <meta name="viewport" content="initial-scale=1, width=device-width" />
       <body
         style={{
           background: gradient,
         }}
       >
         <AppBar />
-        {children}
+        <aFrameLoadedProvider.Provider value={aFrameLoaded}>
+          {children}
+        </aFrameLoadedProvider.Provider>
       </body>
     </html>
   );
