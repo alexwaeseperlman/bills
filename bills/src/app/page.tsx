@@ -156,8 +156,7 @@ function ARContainer(props: { onPictureTaken: (data: string) => void }) {
           sceneRef.current!.contentWindow?.postMessage(
             { type: "createModel", src: url, modelId: getId(url) },
             "*"
-          );
-        }}
+          );}}
       />
       <iframe
         tabIndex={-1}

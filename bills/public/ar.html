@@ -10,7 +10,7 @@
             let model;
             let scene;
             if ("modelId" in event.data) {
-                model = document.getElementById(event.data.modelId);
+                model = document.getElementById("model" + event.data.modelId);
             }
             switch (event.data.type) {
                 case "rotate":
@@ -41,14 +41,14 @@
                     break;
                 case "createModel":
                     // modelId, link to model
-                    scene = document.getElementsByTagName("a-scene")[0];
-                    console.log(scene)
+                    assets = document.getElementsByTagName("a-assets")[0];
+                    console.log(assets)
                     var asset = document.createElement("a-asset-item")
                     asset.id = "asset" + event.data.modelId;
                     asset.setAttribute("src", event.data.src);
-                    scene.appendChild(asset);
-                    break;
-                case "spawnModel":
+                    assets.appendChild(asset);
+                //     break;
+                // case "spawnModel":
                     // modelId
                     scene = document.getElementsByTagName("a-scene")[0];
                     var entity = document.createElement("a-entity");
@@ -60,6 +60,12 @@
                     modelTag.setAttribute("src", "#asset" + event.data.modelId);
                     modelTag.setAttribute("visible", "true");
                     entity.appendChild(modelTag);
+                    break;
+                case "deleteModel":
+                    var entity = document.getElementById("entity" + event.data.modelId);
+                    entity.remove();
+                    var asset = document.getElementById("asset" + event.data.modelId);
+                    asset.remove();
                     break;
             }
         })
