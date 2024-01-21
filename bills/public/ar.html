@@ -8,7 +8,7 @@
 
 <body>
 
-    <a-scene mindar-face vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-face embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         <a-assets>
             <a-asset-item id="headModel"
                 src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
@@ -41,5 +41,34 @@
         </a-entity>
     </a-scene>
 </body>
+
+<script>
+    window.onmessage = function (e) {
+        console.log(e)
+        if (e.data == 'takePicture') {
+            var canvas = document.querySelector('canvas');
+            console.log(document.querySelectorAll('canvas'));
+            canvas.style.display = 'none';
+            const video = document.querySelector('video');
+            setTimeout(() => {
+                // why is this needed??????
+                canvas.style.display = 'block';
+                const hiddenCanv = document.createElement('canvas');
+                hiddenCanv.width = 640;
+                hiddenCanv.height = 480;
+                const hiddenCtx = hiddenCanv.getContext('2d');
+                hiddenCtx.drawImage(video, 640, 0, -640, 480);
+                hiddenCtx.drawImage(canvas, 0, 0, 640, 480);
+
+                const dataURL = hiddenCanv.toDataURL('image/jpeg', 0.5);
+
+                window.parent.postMessage({
+                    type: 'takePicture',
+                    dataURL
+                }, '*');
+            }, 10);
+        }
+    }
+</script>
 
 </html>
