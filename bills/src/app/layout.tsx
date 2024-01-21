@@ -15,7 +15,12 @@ import { useRef } from "react";
 const inter = Inter({ subsets: ["latin"] });
 const gradient = `linear-gradient(90deg, #ffffff 0%, #f7f2f2 100%)`;
 
-function AppBarItem(props: { label: string; href: string, left?: boolean, right?: boolean }) {
+function AppBarItem(props: {
+  label: string;
+  href: string;
+  left?: boolean;
+  right?: boolean;
+}) {
   const selected = window.location.pathname === props.href;
   const color = "white";
 
@@ -34,20 +39,25 @@ function AppBarItem(props: { label: string; href: string, left?: boolean, right?
         backgroundColor: orange,
         height: "100%",
         p: 2,
+        whiteSpace: "nowrap",
 
-        ...(props.left ? {
-          borderTopLeftRadius: '8px',
-          borderBottomLeftRadius: "8px",
-        } : {}),
+        ...(props.left
+          ? {
+              borderTopLeftRadius: "8px",
+              borderBottomLeftRadius: "8px",
+            }
+          : {}),
 
-        ...(props.right ? {
-          borderTopRightRadius: "8px",
-          borderBottomRightRadius: "8px",
-        } : {}),
+        ...(props.right
+          ? {
+              borderTopRightRadius: "8px",
+              borderBottomRightRadius: "8px",
+            }
+          : {}),
 
         transition: "background-color 0.1s ease-out",
 
-        ':hover': {
+        ":hover": {
           backgroundColor: hoverOrange,
         },
       }}
@@ -69,6 +79,8 @@ function AppBarItem(props: { label: string; href: string, left?: boolean, right?
 function AppBar() {
   const ref = useRef<HTMLDivElement>(null);
 
+  const leaderboard = window.location.pathname === "/leaderboard";
+
   return (
     <>
       <Box
@@ -80,16 +92,18 @@ function AppBar() {
           background: orange,
           width: "min-content",
           borderRadius: "lg",
-          margin: "8px auto 8px auto",
-          position: "relative",
+          margin: "8px 8px 8px 8px",
+          position: "fixed",
+          right: 0,
+          bottom: 0,
         })}
       >
-        <Box ref={ref} sx={{
-          position: "absolute",
-        }}></Box>
-        <AppBarItem left label="Home" href="/" />
-        <AppBarItem label="Browse" href="/browse" />
-        <AppBarItem right label="Leaderboard" href="/leaderboard" />
+        <AppBarItem
+          right
+          left
+          label={leaderboard ? "Go to home" : "Go to leaderboard"}
+          href={leaderboard ? "/" : "/leaderboard"}
+        />
       </Box>
     </>
   );
