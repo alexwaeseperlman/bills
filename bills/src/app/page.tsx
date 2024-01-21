@@ -110,9 +110,11 @@ export default function Home() {
   const [newPromptOpen, setNewPromptOpen] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [picturePopup, setPicturePopup] = useState<string | null>(null);
+  const [modelUrl, setModelUrl] = useState<string | null>(null);
 
   return (
     <main>
+      <ModelOptions onChange={(url) => setModelUrl(url)} />
       <ARContainer
         onPictureTaken={(pic) => {
           setPicturePopup(pic);
@@ -142,6 +144,73 @@ export default function Home() {
         setPromptOpen={setNewPromptOpen}
       />
     </main>
+  );
+}
+
+function ModelOptions({ onChange }: { onChange: (url: string) => void }) {
+  const [models, setModels] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/list3Dmodels")
+      .then((res) => res.json())
+      .then((res) => setModels(res));
+  }, []);
+  console.log(models);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        p: 2,
+      }}
+      id="twtoidjfs"
+    >
+      {models.map((model, i) => (
+        <ModelThumbnail
+          key={i}
+          model={model}
+          onChange={(url) => {
+            onChange(url);
+          }}
+        />
+      ))}
+    </Box>
+  );
+}
+
+function ModelThumbnail({
+  model,
+  onChange,
+}: {
+  model: any;
+  onChange: (url: string) => void;
+}) {
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  console.log(model)
+
+  return (
+    <Box
+      sx={{
+        p: 2,
+        cursor: "pointer",
+        ":hover": {
+          background: "rgba(0,0,0,0.1)",
+        },
+      }}
+      onClick={() => {
+        onChange(url);
+      }}
+    >
+      <img src={thumbnail} width={200} />
+    </Box>
   );
 }
 
