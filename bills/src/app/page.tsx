@@ -16,7 +16,6 @@ import {
   Typography,
 } from "@mui/joy";
 import { PrimaryButton, PrimaryButtonOutlined } from "@bills/theme";
-import { aFrameLoadedProvider as AFrameLoadedContext } from "./layout";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 function ARContainer(props: { onPictureTaken: (data: string) => void }) {
@@ -187,6 +186,7 @@ function PictureModal({
 }) {
   const [publishing, setPublishing] = useState(false);
 
+  if (!picture) return null;
   return (
     <Modal
       open={!!picture}

@@ -99,7 +99,11 @@ export default function Home() {
           },
         })}
       >
-        {pics.map((pic) => (
+        {pics.map((pic: {
+          image: string;
+          upvotes: number;
+          _id: string;
+        }) => (
           <PicCard
             image={pic.image}
             upvotes={pic.upvotes}
