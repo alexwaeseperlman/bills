@@ -43,20 +43,23 @@
                     // modelId, link to model
                     scene = document.getElementsByTagName("a-scene")[0];
                     console.log(scene)
-                    var asset = scene.createElement("a-asset-item");
+                    var asset = document.createElement("a-asset-item")
                     asset.id = "asset" + event.data.modelId;
                     asset.setAttribute("src", event.data.src);
+                    scene.appendChild(asset);
                     break;
                 case "spawnModel":
                     // modelId
                     scene = document.getElementsByTagName("a-scene")[0];
-                    var entity = scene.createElement("a-entity");
+                    var entity = document.createElement("a-entity");
                     entity.setAttribute("mindar-face-target", "anchorIndex: 1");
                     entity.id = "entity" + event.data.modelId;
-                    var modelTag = entity.createElement("a-gltf-model");
+                    scene.appendChild(entity);
+                    var modelTag = document.createElement("a-gltf-model");
                     modelTag.id = "model" + event.data.modelId;
                     modelTag.setAttribute("src", "#asset" + event.data.modelId);
                     modelTag.setAttribute("visible", "true");
+                    entity.appendChild(modelTag);
                     break;
             }
         })
