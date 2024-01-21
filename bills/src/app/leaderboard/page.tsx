@@ -73,11 +73,15 @@ export default function Home() {
   return (
     <main>
       <Box
-        sx={{
+        sx={theme => ({
           display: "flex",
           flexWrap: "wrap",
           width: "100%",
-        }}
+          [theme.breakpoints.down("sm")]: {
+            justifyContent: "center",
+          },
+          
+        })}
       >
         {pics.map((pic) => (
           <PicCard
